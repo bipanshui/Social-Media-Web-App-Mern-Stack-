@@ -1,12 +1,17 @@
+import { createRequire } from 'module';
 import express from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import AuthRoute from './Routes/AuthRoute.js';
-import UserRoute from './Routes/UserRoute.js';
-import PostRoute from './Routes/PostRoute.js';
-import UploadRoute from './Routes/UploadRoute.js';
+
+const require = createRequire(import.meta.url);
+const bufferModule = require('buffer');
+
+// Node 25 removed SlowBuffer; some older transitive deps still expect it.
+if (!bufferModule.SlowBuffer) {
+    bufferModule.SlowBuffer = bufferModule.Buffer;
+}
 
 
 // Routes
@@ -24,6 +29,11 @@ app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
 
 dotenv.config();
+
+const { default: AuthRoute } = await import('./Routes/AuthRoute.js');
+const { default: UserRoute } = await import('./Routes/UserRoute.js');
+const { default: PostRoute } = await import('./Routes/PostRoute.js');
+const { default: UploadRoute } = await import('./Routes/UploadRoute.js');
 
 mongoose.connect
     (process.env.MONGO_DB, { useNewUrlParser: true, useUnifiedTopology: true }
